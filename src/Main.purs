@@ -10,7 +10,7 @@ import Data.Int as Int
 import Math ((%))
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE, log)
-import Launchpad (LAUNCHPAD, LaunchEff, Connection, Configuration, Hue(..), Intensity(..), Color(..), ButtonColor, Grid(..), buttonRef, connect, disconnect, gridSideLength, gridToButtons, minIndex, maxIndex, setAll, setGrid, setButtonColor, unsafeButtonRef)
+import Launchpad (LAUNCHPAD, LaunchEff, Connection, Configuration, Hue(..), Intensity(..), Color(..), ButtonColor, Grid(..), buttonRef, connect, disconnect, gridSideLength, gridToButtons, minIndex, maxIndex, mapToGrid, setAll, setGrid, setButtonColor, unsafeButtonRef)
 import Signal
 import Signal.DOM
 import Signal.Time
@@ -33,7 +33,7 @@ sineGrid =
 crummySineGrid rotNum =
   let sine = crummySineGridArrays
       len = Array.length sine
-   in Grid $ flip map sine $ \s ->
+   in mapToGrid $ flip map sine $ \s ->
         (Array.slice rotNum len s) <>
         (Array.slice 0 rotNum s)
 
@@ -66,7 +66,7 @@ crummySineGridArrays =
 
 main = do
   c <- connect { port: 0 }
-  let looper = foldp loopLogic initialState (every 90.0)
+  let looper = foldp loopLogic initialState (every 60.0)
   -- runSignal $ looper ~> renderBoard c
   runSignal (renderBoard c <$> looper)
 
@@ -79,8 +79,6 @@ loopLogic _ s =
           Just (Color Orange _) -> Just $ Color Yellow High
           Just (Color Yellow _) -> Just $ Color Green High
           Just (Color Green _) -> Just $ Color Red Low
-      intRem a b =
-        Int.floor $ (Int.toNumber a) % (Int.toNumber b)
       nextNum = s.rotNum + 1
    in s { currentColor = nextColor
         , rotNum = if nextNum > 7 then 0 else nextNum

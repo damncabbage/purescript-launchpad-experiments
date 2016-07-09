@@ -5,7 +5,7 @@ module Launchpad
   , Color(..)
   , Configuration
   , Connection
-  , Grid(..)
+  , Grid
   , Hue(..)
   , Intensity(..)
   , LaunchEff
@@ -17,6 +17,7 @@ module Launchpad
   , gridToButtons
   , minIndex
   , maxIndex
+  , mapToGrid
   , setAll
   , setGrid
   , setButtonColor
