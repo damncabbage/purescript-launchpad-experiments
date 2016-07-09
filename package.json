@@ -6,11 +6,18 @@
   "dependencies": {
     "midi-launchpad": "^1.0.3"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "pulp": "^9.0.1",
+    "purescript": "^0.9.1",
+    "purescript-psa": "^0.3.9"
+  },
   "scripts": {
+    "postinstall": "bower install && npm run build",
+    "build": "pulp build --to pad.js",
+    "start": "node pad.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "Apache-2.0"
 }
