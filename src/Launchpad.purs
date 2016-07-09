@@ -2,6 +2,8 @@ module Launchpad
   ( LAUNCHPAD
   , ButtonColor
   , ButtonRef
+  , ButtonPress
+  , ButtonPressState(..)
   , Color(..)
   , Configuration
   , Connection
@@ -9,7 +11,9 @@ module Launchpad
   , Hue(..)
   , Intensity(..)
   , LaunchEff
+  , anyButtonPressed
   , buttonRef
+  , clearAll
   , connect
   , demo
   , disconnect
@@ -22,24 +26,28 @@ module Launchpad
   , setGrid
   , setButtonColor
   , unsafeButtonRef
+  , unButtonRef
+  , unGrid
   ) where
 
 import Prelude
 import Debug.Trace (spy)
 import Data.Int as Int
 import Data.Array as Array
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), isJust, maybe)
 import Data.Foldable (all)
 import Data.Traversable (traverse, for_)
 import Data.Tuple (Tuple(..), uncurry)
 import Data.Tuple.Nested ((/\))
-import Data.Function.Uncurried (Fn4, runFn4)
+import Data.Function.Uncurried (Fn4, Fn7, runFn4, runFn7)
 import Control.Monad.Aff (Aff, makeAff, launchAff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Console (log)
+import Global as Global
 import Math ((%))
+import Signal (Signal, constant, (~>))
 
 foreign import data LAUNCHPAD :: !
 
@@ -62,6 +70,39 @@ foreign import disconnect
 foreign import sendMessageImpl
   :: forall e
    . Fn4 Connection Int Int Int (Eff (LaunchEff e) Unit)
+
+foreign import anyButtonPressedP :: forall a x y e c. Fn7
+  Connection
+  (c -> Signal c)
+  (a -> Maybe a)
+  (Maybe a)
+  (y -> (x -> y) -> Maybe x -> y)
+  (String -> Maybe ButtonRef)
+  (Boolean -> ButtonPressState)
+  (Eff (LaunchEff e) (Signal ButtonPress))
+
+type ButtonPress =
+  { deltaTime :: Number
+  , button ::
+      Maybe
+        { ref :: ButtonRef
+        , pressed :: ButtonPressState
+        }
+  }
+data ButtonPressState =
+    ButtonPressed
+  | ButtonReleased
+
+anyButtonPressed :: forall e. Connection -> Eff (LaunchEff e) (Signal ButtonPress)
+anyButtonPressed conn =
+  runFn7 anyButtonPressedP conn constant Just Nothing maybe fromNote $ \b ->
+    if b then ButtonPressed else ButtonReleased
+  where
+    fromNote v =
+      let num = Global.readNumber v
+          y = Int.floor (num / 16.0)
+          x = Int.floor (num % 16.0)
+       in buttonRef x y
 
 withConnection
   :: forall e
@@ -87,6 +128,10 @@ data Color = Color Hue Intensity
 type ButtonColor = Maybe Color
 
 newtype ButtonRef = ButtonRef { x :: Int, y :: Int }
+
+unButtonRef :: ButtonRef -> { x :: Int, y :: Int }
+unButtonRef (ButtonRef r) = r
+
 data SpecialButtonRef =
     TopSpecial Int
   | RightSpecial Int
@@ -101,7 +146,6 @@ setButtonColor conn but col =
   runFn4 sendMessageImpl conn 144 (toNote but) (colorToCode col)
   where
     toNote (ButtonRef p) = (p.y * 16) + p.x
-
 
 colorToCode :: ButtonColor -> Int
 colorToCode Nothing = 0
@@ -189,6 +233,9 @@ data Grid a = Grid (Array (Array a))
 -- Maps as if entirely flat.
 instance gridFunctor :: Functor Grid where
   map f (Grid ys) = Grid $ map (map f) ys
+
+unGrid :: forall a. Grid a -> (Array (Array a))
+unGrid (Grid xs) = xs
 
 mapToGrid
   :: forall a

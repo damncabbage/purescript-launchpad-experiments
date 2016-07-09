@@ -9,9 +9,6 @@ exports.connect = function(config){
     var input = new midi.input();
     output.openPort(port);
     input.openPort(port);
-    input.on('message', function(deltaTime, message) {
-      console.log('here' + message);
-    });
     return {
       port: port,
       output: output,
@@ -34,3 +31,38 @@ exports.sendMessageImpl = function(conn, row, note, col){
     conn.output.sendMessage([row, note, col])
   };
 };
+
+exports.anyButtonPressedP =
+  function(conn, constant, just, nothing, maybe, fromNote, buttonPressState) {
+    return function(){
+      var out = constant({
+        deltaTime: 0,
+        button: nothing
+      })
+      conn.input.on('message', function(deltaTime, message) {
+        var isPressed = (parseInt(message[2],10) == 127)
+        var ps = buttonPressState(isPressed);
+
+        var button = maybe(false)(function(x) { return x })(fromNote(message[1]));
+        console.log(deltaTime, message[1])
+        if (!button) {
+          return;
+        }
+        if (isPressed) {
+          out.set({
+            deltaTime: deltaTime,
+            button: just({
+              ref: button,
+              pressed: buttonPressState
+            })
+          })
+        } else {
+          out.set({
+            deltaTime: deltaTime,
+            button: nothing
+          })
+        }
+      });
+      return out;
+    };
+  };
