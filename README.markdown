@@ -14,3 +14,5 @@ $ cd pad
 $ npm install
 $ npm start
 ```
+
+There are six experiments; try them out with `npm run ex1`, `npm run ex2`, etc.

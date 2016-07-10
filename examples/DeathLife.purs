@@ -1,4 +1,4 @@
-module Main where
+module Examples.DeathLife where
 
 import Debug.Trace (traceAny, spy)
 import Prelude
@@ -66,7 +66,7 @@ nextGameState maybePress st =
           Array.singleton <<< (\p -> at p.x p.y) <<< unButtonRef $ bp.button.ref
       zeroHour = st.staging.countdown == 0
       advanced = advance st.alive
-      newCountDown = 4
+      newCountDown = 3
       didPress = Array.length freshPress > 0
       newAlive = 
         advanced <>
