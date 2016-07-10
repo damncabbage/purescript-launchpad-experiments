@@ -1,4 +1,4 @@
-module Main where
+module Examples.BasicLife where
 
 import Debug.Trace (traceAny, spy)
 import Prelude
@@ -98,6 +98,41 @@ neighbourRefs (Tuple x y) = do
 at :: Int -> Int -> Cell
 at = (/\)
 
-relativeTo :: Cell -> Array Cell -> Array Cell
+relativeTo :: Cell -> Array Cell -> Array Cell 
 relativeTo (Tuple x y) =
   map (\(Tuple px py) -> (px + x) /\ (py + y))
+
+
+
+-- TODO: Scrap:
+
+crummySineGrid rotNum =
+  let sine = crummySineGridArrays
+      len = Array.length sine
+   in mapToGrid $ flip map sine $ \s ->
+        (Array.slice rotNum len s) <>
+        (Array.slice 0 rotNum s)
+
+crummySineGridArrays =
+  flip mapWithIndex strings $ \(idx /\ row) ->
+    mapWithIndex
+      (\(idx /\ c) -> charToCol c)
+      (String.toCharArray row)
+  where
+    mapWithIndex :: forall a b. ((Tuple Int a) -> b) -> Array a -> Array b
+    mapWithIndex f = map f <<< Array.zip (Array.range 0 7)
+    charToCol c =
+      case c of
+        'G' -> Just (Color Green High)
+        'R' -> Just (Color Red High)
+        'Y' -> Just (Color Yellow High)
+        _ -> Nothing
+    strings =
+      ["GG      G"
+      ,"RRG    GR"
+      ,"YYRG  GRY"
+      ,"  RG  GR "
+      ,"  YRGGRY "
+      ,"   RGGR  "
+      ,"   YRRY  "
+      ,"    YY   "]
