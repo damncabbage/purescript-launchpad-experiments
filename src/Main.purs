@@ -26,6 +26,29 @@ type State =
 initialState =
   { grid: [] }
 
+main = do
+  c <- connect { port: 0 }
+  clearAll c
+  buttonPress <- anyButtonPressed c
+  let intervalTimer = every 60.0
+      looper = foldp nextGameState initialState (sampleOn intervalTimer buttonPress)
+  runSignal $ looper ~> renderBoard c
+
+nextGameState :: Maybe ButtonPress -> State -> State
+nextGameState maybePress st =
+  let userContribution =
+        case maybePress of
+          Nothing -> []
+          Just bp -> []
+   in st -- TODO
+
+cellsToButtons :: Array (Array Cell) -> Array (Tuple ButtonRef ButtonColor)
+cellsToButtons xs = [] -- TODO
+
+renderBoard :: Connection -> State -> Eff _ Unit
+renderBoard c st =
+  setButtons c <<< cellsToButtons <<< Array.fromFoldable $ st.grid
+
 crummySineGrid rotNum =
   let sine = crummySineGridArrays
       len = Array.length sine
@@ -56,37 +79,3 @@ crummySineGridArrays =
       ,"   RGGR  "
       ,"   YRRY  "
       ,"    YY   "]
-
-main = pure unit
-{-do
-  c <- connect { port: 0 }
-  clearAll c
-  buttonPress <- anyButtonPressed c
-  let intervalTimer = every 60.0
-      looper = foldp nextGameState initialState (sampleOn intervalTimer buttonPress)
-  runSignal $ looper ~> renderBoard c
-
-addPressedToState :: Maybe ButtonPress -> State -> State
-addPressedToState maybePress st =
-  let col = if bp.deltaTime < 0.5
-              then Color Yellow High
-              else if bp.deltaTime < 1.0
-                then Color Orange High
-                else Color Red High
-   in case bp.button of
-        Just b ->
-          traceAny (b.ref) $ \_ ->
-            unButtonRef b.ref # \r ->
-              st { pressed =
-                StrMap.insert
-                  (show r.x <> "," <> show r.y)
-                  (b.ref /\ Just col)
-                  st.pressed
-              }
-        Nothing ->
-          st
-
-renderBoard :: Connection -> State -> Eff _ Unit
-renderBoard c st =
-  setButtons c $ Array.fromFoldable st.pressed
--}

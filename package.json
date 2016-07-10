@@ -16,8 +16,8 @@
     "build": "pulp build --to pad.js",
     "start": "npm run build && node pad.js",
     "ex1": "pulp build -I examples --to ex1.js -m 'Examples.AllPad' && node ex1.js",
-    "ex2": "pulp build -I examples --to ex2.js -m 'Examples.Wave' && node ex2.js",
-    "ex3": "pulp build -I examples --to ex3.js -m 'Examples.ButtonPad' && node ex3.js",
+    "ex2": "pulp build -I examples --to ex2.js -m 'Examples.ButtonPad' && node ex2.js",
+    "ex3": "pulp build -I examples --to ex3.js -m 'Examples.Wave' && node ex3.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
