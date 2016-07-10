@@ -19,6 +19,7 @@
     "ex2": "pulp build -I examples --to ex2.js -m 'Examples.ButtonPad' && node ex2.js",
     "ex3": "pulp build -I examples --to ex3.js -m 'Examples.Wave' && node ex3.js",
     "ex4": "pulp build -I examples --to ex4.js -m 'Examples.BasicLife' && node ex4.js",
+    "ex5": "pulp build -I examples --to ex5.js -m 'Examples.StagingLife' && node ex5.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

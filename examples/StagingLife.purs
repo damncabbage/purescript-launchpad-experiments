@@ -1,4 +1,4 @@
-module Main where
+module Examples.StagingLife where
 
 import Debug.Trace (traceAny, spy)
 import Prelude
