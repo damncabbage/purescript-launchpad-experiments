@@ -35,32 +35,24 @@ exports.sendMessageImpl = function(conn, row, note, col){
 exports.anyButtonPressedP =
   function(conn, constant, just, nothing, maybe, fromNote, buttonPressState) {
     return function(){
-      var out = constant({
-        deltaTime: 0,
-        button: nothing
-      })
+      var out = constant(nothing);
       conn.input.on('message', function(deltaTime, message) {
         var isPressed = (parseInt(message[2],10) == 127)
         var ps = buttonPressState(isPressed);
+        var button =
+          maybe(false)(function(x) { return x })(fromNote(message[1]));
 
-        var button = maybe(false)(function(x) { return x })(fromNote(message[1]));
         console.log(deltaTime, message[1])
-        if (!button) {
-          return;
-        }
-        if (isPressed) {
-          out.set({
-            deltaTime: deltaTime,
-            button: just({
-              ref: button,
-              pressed: buttonPressState
-            })
-          })
+        if (!button || !isPressed) {
+          out.set(nothing)
         } else {
-          out.set({
+          out.set(just({
             deltaTime: deltaTime,
-            button: nothing
-          })
+            button: {
+              ref: button,
+              pressed: ps
+            }
+          }))
         }
       });
       return out;

@@ -81,21 +81,20 @@ foreign import anyButtonPressedP :: forall a x y e c. Fn7
   (y -> (x -> y) -> Maybe x -> y)
   (String -> Maybe ButtonRef)
   (Boolean -> ButtonPressState)
-  (Eff (LaunchEff e) (Signal ButtonPress))
+  (Eff (LaunchEff e) (Signal (Maybe ButtonPress)))
 
 type ButtonPress =
   { deltaTime :: Number
   , button ::
-      Maybe
-        { ref :: ButtonRef
-        , pressed :: ButtonPressState
-        }
+      { ref :: ButtonRef
+      , pressed :: ButtonPressState
+      }
   }
 data ButtonPressState =
     ButtonPressed
   | ButtonReleased
 
-anyButtonPressed :: forall e. Connection -> Eff (LaunchEff e) (Signal ButtonPress)
+anyButtonPressed :: forall e. Connection -> Eff (LaunchEff e) (Signal (Maybe ButtonPress))
 anyButtonPressed conn =
   runFn7 anyButtonPressedP conn constant Just Nothing maybe fromNote $ \b ->
     if b then ButtonPressed else ButtonReleased

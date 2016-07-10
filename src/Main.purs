@@ -18,17 +18,13 @@ import Signal.DOM
 import Signal.Time
 import X.Array (mapWithIndex)
 
+data Cell = Alive | Dead
+
 type State =
-  { currentColor :: ButtonColor
-  , rotNum :: Int
-  , pressed :: StrMap.StrMap (Tuple ButtonRef ButtonColor)
-  }
+  { grid :: Array (Array Cell) }
 
 initialState =
-  { currentColor: Nothing
-  , rotNum: 0
-  , pressed: StrMap.fromFoldable []
-  }
+  { grid: [] }
 
 crummySineGrid rotNum =
   let sine = crummySineGridArrays
@@ -58,21 +54,20 @@ crummySineGridArrays =
       ,"  RG  GR "
       ,"  YRGGRY "
       ,"   RGGR  "
-      ,"   YRRY  " 
+      ,"   YRRY  "
       ,"    YY   "]
 
-main = do
+main = pure unit
+{-do
   c <- connect { port: 0 }
   clearAll c
   buttonPress <- anyButtonPressed c
   let intervalTimer = every 60.0
-      looper = foldp addPressedToState initialState (sampleOn intervalTimer buttonPress)
-  -- runSignal $ looper ~> renderBoard c
-  --let looper = foldp loopLogic initialState (sampleOn (every 60.0) {})
-  runSignal (renderPressedBoard c <$> looper)
+      looper = foldp nextGameState initialState (sampleOn intervalTimer buttonPress)
+  runSignal $ looper ~> renderBoard c
 
-addPressedToState :: ButtonPress -> State -> State
-addPressedToState bp st =
+addPressedToState :: Maybe ButtonPress -> State -> State
+addPressedToState maybePress st =
   let col = if bp.deltaTime < 0.5
               then Color Yellow High
               else if bp.deltaTime < 1.0
@@ -91,25 +86,7 @@ addPressedToState bp st =
         Nothing ->
           st
 
-renderPressedBoard :: Connection -> State -> Eff _ Unit
-renderPressedBoard c st =
-  setButtons c $ Array.fromFoldable st.pressed
-
-loopLogic :: _ -> State -> State
-loopLogic _ s =
-  let nextColor =
-        case s.currentColor of
-          Nothing -> Just $ Color Red High
-          Just (Color Red _) -> Just $ Color Orange High
-          Just (Color Orange _) -> Just $ Color Yellow High
-          Just (Color Yellow _) -> Just $ Color Green High
-          Just (Color Green _) -> Just $ Color Red Low
-      nextNum = s.rotNum + 1
-   in s { currentColor = nextColor
-        , rotNum = if nextNum > 7 then 0 else nextNum
-        }
-
 renderBoard :: Connection -> State -> Eff _ Unit
-renderBoard c s =
-  --setAll c s.currentColor
-  setGrid c <<< gridToButtons $ crummySineGrid s.rotNum
+renderBoard c st =
+  setButtons c $ Array.fromFoldable st.pressed
+-}

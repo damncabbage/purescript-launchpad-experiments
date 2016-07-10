@@ -32,16 +32,18 @@ main = do
       looper = foldp addPressedToState initialState (sampleOn intervalTimer buttonPress)
   runSignal $ looper ~> renderPressedBoard c
 
-addPressedToState :: ButtonPress -> State -> State
-addPressedToState bp st =
-  let col = if bp.deltaTime < 0.5
-              then Color Yellow High
-              else if bp.deltaTime < 1.0
-                then Color Orange High
-                else Color Red High
-   in case bp.button of
-        Just b ->
-          traceAny (b.ref) $ \_ ->
+addPressedToState :: Maybe ButtonPress -> State -> State
+addPressedToState mbp st =
+  case mbp of
+    Nothing -> st
+    Just bp ->
+      let col = if bp.deltaTime < 0.5
+                  then Color Yellow High
+                  else if bp.deltaTime < 1.0
+                    then Color Orange High
+                    else Color Red High
+          b = bp.button
+       in traceAny (b.ref) $ \_ ->
             unButtonRef b.ref # \r ->
               st { pressed =
                 StrMap.insert
@@ -49,8 +51,6 @@ addPressedToState bp st =
                   (b.ref /\ Just col)
                   st.pressed
               }
-        Nothing ->
-          st
 
 renderPressedBoard :: Connection -> State -> Eff _ Unit
 renderPressedBoard c st =
