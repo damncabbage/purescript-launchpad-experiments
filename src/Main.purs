@@ -12,10 +12,11 @@ import Data.StrMap as StrMap
 import Math ((%))
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE, log)
-import Launchpad (LAUNCHPAD, LaunchEff, Connection, Configuration, Hue(..), Intensity(..), Color(..), ButtonColor, ButtonRef, ButtonPress, ButtonPressState, Grid(..), anyButtonPressed, buttonRef, clearAll, connect, disconnect, gridSideLength, gridToButtons, minIndex, maxIndex, mapToGrid, setAll, setGrid, setButtonColor, unsafeButtonRef, unButtonRef, unGrid)
+import Launchpad -- (LAUNCHPAD, LaunchEff, Connection, Configuration, Hue(..), Intensity(..), Color(..), ButtonColor, ButtonRef, ButtonPress, ButtonPressState, Grid(..), anyButtonPressed, buttonRef, clearAll, connect, disconnect, gridSideLength, gridToButtons, minIndex, maxIndex, mapToGrid, setAll, setGrid, setButtonColor, unsafeButtonRef, unButtonRef, unGrid)
 import Signal
 import Signal.DOM
 import Signal.Time
+import X.Array (mapWithIndex)
 
 type State =
   { currentColor :: ButtonColor
@@ -28,11 +29,6 @@ initialState =
   , rotNum: 0
   , pressed: StrMap.fromFoldable []
   }
-
-sineGrid =
-  map
-    (\_ -> Array.range minIndex maxIndex)
-    (Array.range minIndex maxIndex)
 
 crummySineGrid rotNum =
   let sine = crummySineGridArrays
@@ -97,7 +93,7 @@ addPressedToState bp st =
 
 renderPressedBoard :: Connection -> State -> Eff _ Unit
 renderPressedBoard c st =
-  setGrid c <<< mapToGrid $ [Array.fromFoldable st.pressed]
+  setButtons c $ Array.fromFoldable st.pressed
 
 loopLogic :: _ -> State -> State
 loopLogic _ s =

@@ -23,6 +23,7 @@ module Launchpad
   , maxIndex
   , mapToGrid
   , setAll
+  , setButtons
   , setGrid
   , setButtonColor
   , unsafeButtonRef
@@ -48,6 +49,7 @@ import Control.Monad.Eff.Console (log)
 import Global as Global
 import Math ((%))
 import Signal (Signal, constant, (~>))
+import X.Array (mapWithIndex)
 
 foreign import data LAUNCHPAD :: !
 
@@ -204,15 +206,10 @@ gridToButtons (Grid gs) =
       flip mapWithIndex row $ \(xi /\ col) ->
         (unsafeButtonRef xi yi /\ col)
 
-mapWithIndex :: forall a b. ((Tuple Int a) -> b) -> Array a -> Array b
-mapWithIndex f = map f <<< Array.zip (Array.range 0 7)
-
-{-
-setAllForGrid :: forall e. Connection -> Grid ButtonColor -> Eff (LaunchEff e) Unit
-setAllForGrid conn (Grid gs) =
-  for_  $ \b ->
-    setButtonColor conn b col
-    -}
+setButtons :: forall e. Connection -> Array (Tuple ButtonRef ButtonColor) -> Eff (LaunchEff e) Unit
+setButtons conn bs =
+  for_ bs $ \b ->
+    uncurry (setButtonColor conn) b
 
 topLeft :: ButtonRef
 topLeft = unsafeButtonRef 0 0
