@@ -12,7 +12,7 @@ import Data.StrMap as StrMap
 import Math ((%))
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE, log)
-import Launchpad (LAUNCHPAD, LaunchEff, Connection, Configuration, Hue(..), Intensity(..), Color(..), ButtonColor, ButtonRef, ButtonPress, ButtonPressState, Grid(..), anyButtonPressed, buttonRef, clearAll, connect, disconnect, gridSideLength, gridToButtons, minIndex, maxIndex, mapToGrid, setAll, setGrid, setButtonColor, unsafeButtonRef, unButtonRef, unGrid)
+import Launchpad (LAUNCHPAD, LaunchEff, Connection, Configuration, Hue(..), Intensity(..), Color(..), ButtonColor, ButtonRef, ButtonPress, ButtonPressState, Grid(..), anyButtonPressed, buttonRef, clearAll, connect, disconnect, gridSideLength, gridToButtons, minIndex, maxIndex, mapToGrid, setAll, setGrid, setButtons, setButtonColor, unsafeButtonRef, unButtonRef, unGrid)
 import Signal
 import Signal.DOM
 import Signal.Time
@@ -54,4 +54,4 @@ addPressedToState bp st =
 
 renderPressedBoard :: Connection -> State -> Eff _ Unit
 renderPressedBoard c st =
-  setGrid c <<< mapToGrid $ [Array.fromFoldable st.pressed]
+  setButtons c $ Array.fromFoldable st.pressed
