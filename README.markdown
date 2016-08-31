@@ -4,7 +4,6 @@ Things you need:
 * A Novation Launchpad Mini
 * An Internet connection to download dependencies.
 * Node.js 4.x
-* Absolutely no Ruby. Sorry.
 
 Installation instructions:
 
